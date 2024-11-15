@@ -9,12 +9,13 @@ import Geocoder from '../addLocation/Geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 function AddDetails() {
-  const { state: { slocation, flocation, checkpoints ,title}, dispatch } = useValue();
+  const { state: { slocation, flocation, checkpoints ,description,title}, dispatch } = useValue();
   const [days, setDays] = useState([]);
   const [routeGeometry, setRouteGeometry] = useState(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const [description, setDescription] = useState('');
+  const [descriptio, setDescription] = useState('');
   const [hoveredIndex, setHoveredIndex] = useState(null);
+ 
   const [viewport, setViewport] = useState({
     latitude: slocation.lat,
     longitude: slocation.lng,
@@ -31,7 +32,7 @@ function AddDetails() {
       'line-width': 4,
     },
   };
-
+ 
 
   
   const handleAddDay = () => {
@@ -48,7 +49,7 @@ function AddDetails() {
     if (event.features && event.features.length > 0) return;
     const { lng, lat } = event.lngLat;
 
-    const newCheckpoint = { lng, lat, description: '' };
+    const newCheckpoint = { lng, lat, descriptio: '' };
     dispatch({
       type: 'ADD_CHECKPOINT',
       payload: newCheckpoint
@@ -95,7 +96,7 @@ function AddDetails() {
   const handleSaveDescription = (index) => {
     dispatch({
       type: 'UPDATE_CHECKPOINT',
-      payload: { index, description }
+      payload: { index, description:'day'+index }
     });
     setSelectedPoint(null);
   };
@@ -176,17 +177,22 @@ function AddDetails() {
   }, [slocation, flocation, checkpoints]);
 
   return (
-    <Box>
+    <Box justifyItems="center" alignItems="center" >
       <FormControl>
         <RadioGroup name="costType" row>
           {/* Your existing RadioGroup code */}
         </RadioGroup>
       </FormControl>
-
+    <Stack spacing={2} sx={{ width: '100%', maxWidth: 500, m: 1 }}>
       <InfoField
         mainProps={{ name: 'title', label: 'Title', value: title }}
         minLength={5}
       />
+       <InfoField
+        mainProps={{ name: 'description', label: 'description', value: description }}
+        minLength={5}
+      />
+     </Stack>
 
       <Stack spacing={2} sx={{ width: '100%', maxWidth: 500, m: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -266,35 +272,50 @@ function AddDetails() {
               </Tooltip>
             </Marker>
 
-            {checkpoints.map((checkpoint, index) => (
-              <Marker
-                key={index}
-                latitude={checkpoint.lat}
-                longitude={checkpoint.lng}
-                offsetLeft={-12}
-                offsetTop={-24}
-              >
-                <CheckpointMarker checkpoint={checkpoint} index={index} />
-              </Marker>
-            ))}
+{checkpoints.map((checkpoint, index) => (
+  <Marker
+    key={index}
+    latitude={checkpoint.lat}
+    longitude={checkpoint.lng}
+    offsetLeft={-12}
+    offsetTop={-24}
+  >
+    <Tooltip
+      title={`Day ${index + 1}`}
+      placement="top"
+      arrow
+      enterDelay={200}
+      leaveDelay={0}
+    >
+      <Navigation
+        onDoubleClick={(e) => handleMarkerDoubleClick(checkpoint, index, e)}
+        sx={{
+          color: 'error.main',
+          transform: 'scale(1.5)',
+          '&:hover': { transform: 'scale(1.8)' },
+          cursor: 'pointer'
+        }}
+      />
+    </Tooltip>
+  </Marker>
+))}
 
-            <Marker
-              latitude={flocation.lat}
-              longitude={flocation.lng}
-              offsetLeft={-12}
-              offsetTop={-24}
-            >
-              <Tooltip title="End Location" arrow placement="top">
-                <Navigation
-                  sx={{
-                    color: 'secondary.main',
-                    transform: 'scale(1.5)',
-                    '&:hover': { transform: 'scale(1.8)' }
-                  }}
-                />
-              </Tooltip>
-            </Marker>
-
+<Marker
+  latitude={flocation.lat}
+  longitude={flocation.lng}
+  offsetLeft={-12}
+  offsetTop={-24}
+>
+  <Tooltip title="End Location" arrow placement="top">
+    <Navigation
+      sx={{
+        color: 'secondary.main',
+        transform: 'scale(1.5)',
+        '&:hover': { transform: 'scale(1.8)' }
+      }}
+    />
+  </Tooltip>
+</Marker>
             {selectedPoint && (
               <Popup
                 latitude={selectedPoint.lat}
@@ -313,7 +334,7 @@ function AddDetails() {
                     multiline
                     rows={2}
                     label="Description"
-                    value={description}
+                    value={descriptio}
                     onChange={(e) => setDescription(e.target.value)}
                     onKeyPress={handleKeyPress}
                     autoFocus

@@ -55,7 +55,7 @@ function AddTrails({setPage}) {
     }
   }, [images.length]);
   useEffect(() => {
-    if (details.title.length > 4 && details.description.length > 9) {
+    if (details.title.length > 4) {
       if (!steps[2].completed) setComplete(2, true);
     } else {
       if (steps[2].completed) setComplete(2, false);
