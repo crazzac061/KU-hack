@@ -113,11 +113,7 @@ const TrailsInfo = () => {
                     background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)',
                     padding: '8px 12px',
                   }}
-                  title={
-                    <Typography  sx={{ fontWeight: 'bold', color: '#fff' }}>
-                      {trail.price === 0 ? 'Free Stay' : `$${trail.price}`}
-                    </Typography>
-                  }
+                
                   actionIcon={
                     <Tooltip title={trail.uName} sx={{ mr: '8px' }}>
                       <Avatar src={trail.uPhoto} sx={{ width: 36, height: 36, border: '2px solid #ffffff' }} />
@@ -137,6 +133,7 @@ const TrailsInfo = () => {
                     filter: 'brightness(0.9)',
                     transition: 'filter 0.3s ease',
                   }}
+                  
                   onClick={() => dispatch({ type: 'UPDATE_TRAIL', payload: trail })}
                   onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.1)')}
                   onMouseLeave={(e) => (e.currentTarget.style.filter = 'brightness(0.9)')}
@@ -150,10 +147,17 @@ const TrailsInfo = () => {
                     boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.15)',
                   }}
                   title={
-                    <Typography variant="h6" sx={{ fontWeight: 500, color: '#333' }}>
+                 <Box sx={{display:"flex",flexDirection:"column"}}>
+                     <Typography variant="h6" sx={{ fontWeight: 500, color: '#333' }}>
                       {trail.title}
-                    </Typography>
+                      </Typography>
+                      <Typography variant="h9" sx={{ fontWeight: 500, color: 'grey' }}>
+                      {trail.price === 0 ? 'Free Stay' : `$${trail.price}`}
+                      </Typography>
+                 </Box>
                   }
+
+
                   actionIcon={
                     <Rating
                       sx={{ color: '#ffd700', mr: '8px' }}
@@ -163,8 +167,10 @@ const TrailsInfo = () => {
                       emptyIcon={<StarBorder sx={{ color: '#ffd700' }} />}
                     />
                   }
+                  
                 />
               </ImageListItem>
+              
             </Card>
           ))}
         </ImageList>
