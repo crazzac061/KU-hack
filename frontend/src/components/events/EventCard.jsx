@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,6 +22,7 @@ function EventCard() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openAddEventDialog, setOpenAddEventDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -37,6 +39,8 @@ function EventCard() {
         setEvents(response.data);
       } catch (error) {
         console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvents();
@@ -65,10 +69,23 @@ function EventCard() {
   };
 
   return (
-    <Box sx={{ p: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" color="#06402b">
-          Event Manager
+    <Box
+      sx={{
+        p: 4,
+        minHeight: '100vh',
+        background: 'linear-gradient(to right, #d7f8e7, #f9fffc)',
+      }}
+    >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 'bold',
+            color: '#06402b',
+            // textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
+          }}
+        >
+        Event Manager
         </Typography>
         <Button
           variant="contained"
@@ -77,7 +94,12 @@ function EventCard() {
           sx={{
             fontWeight: 'bold',
             backgroundColor: '#06402b',
-            ':hover': { backgroundColor: '#115293' },
+            color: '#fff',
+            borderRadius: '25px',
+            padding: '10px 20px',
+            ':hover': {
+              backgroundColor: '#115293',
+            },
           }}
         >
           Add Event
@@ -85,47 +107,54 @@ function EventCard() {
       </Box>
 
       {/* Cards Grid */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: 2,
-          justifyContent: 'center',
-          alignItems: 'start',
-        }}
-      >
-        {events.map((event) => (
-          <Card
-            key={event.id}
-            sx={{
-              boxShadow: 3,
-              borderRadius: '8px',
-              p: 2,
-              transition: '0.3s',
-              ':hover': { boxShadow: 6, transform: 'scale(1.02)' },
-            }}
-            onClick={() => handleCardClick(event)}
-          >
-            <CardContent>
-              <Typography
-                variant="subtitle1"
-                color="#06402b"
-                gutterBottom
-                sx={{ fontWeight: 'bold', fontSize: 16 }}
-              >
-                {event.title}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                {event.description}
-              </Typography>
-              <Typography variant="caption" color="textSecondary">
-                <strong>From:</strong> {new Date(event.from).toLocaleDateString()} <br />
-                <strong>To:</strong> {new Date(event.to).toLocaleDateString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+          <CircularProgress color="secondary" />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 3,
+          }}
+        >
+          {events.map((event) => (
+            <Card
+              key={event.id}
+              sx={{
+                boxShadow: 3,
+                borderRadius: '12px',
+                p: 2,
+                transition: 'all 0.3s ease',
+                ':hover': {
+                  boxShadow: 6,
+                  transform: 'translateY(-5px)',
+                },
+                backgroundColor: '#fff',
+              }}
+              onClick={() => handleCardClick(event)}
+            >
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  color="#06402b"
+                  sx={{ fontWeight: 'bold', mb: 1 }}
+                >
+                  {event.title}
+                </Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                  {event.description}
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  <strong>From:</strong> {new Date(event.from).toLocaleDateString()} <br />
+                  <strong>To:</strong> {new Date(event.to).toLocaleDateString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
 
       {/* Chat Section */}
       {selectedEvent && (
@@ -137,6 +166,7 @@ function EventCard() {
             borderRadius: '12px',
             backgroundColor: '#fff',
             position: 'relative',
+            boxShadow: 2,
           }}
         >
           <IconButton

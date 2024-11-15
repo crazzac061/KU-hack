@@ -30,7 +30,8 @@ const TrailsInfo = () => {
   );
 
   return (
-    <Container sx={{ py: 4 }}>
+   <Box sx={{  background: 'linear-gradient(to right, #d7f8e7, #f9fffc)',}}>
+     <Container sx={{ py: 4 }}>
       {/* Search Bar */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
         <TextField
@@ -149,6 +150,7 @@ const TrailsInfo = () => {
         </Typography>
       )}
     </Container>
+   </Box>
   );
 };
 
