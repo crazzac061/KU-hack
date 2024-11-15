@@ -48,7 +48,7 @@ const BottomNav = () => {
                     <BottomNavigationAction label='Event' icon={<Today />} />
                     <BottomNavigationAction label='Trail' icon={<Hiking />} />
                     <BottomNavigationAction label='Add Trails' icon={<AddLocationAltIcon  />} />
-                    <BottomNavigationAction label='Chat' icon={<Add />} />
+                    {/* <BottomNavigationAction label='Chat' icon={<Add />} /> */}
                 </BottomNavigation>
             </Paper>
         </Box>
