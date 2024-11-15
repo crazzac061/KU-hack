@@ -120,11 +120,11 @@ const TrailsInfo = () => {
               />
               <ImageListItemBar
                 sx={{
-                  background: 'rgba(0,0,0,0.8)',
+                  background: 'white',
                   color: '#fff',
                 }}
                 title={
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography variant="h7" sx={{ fontWeight: 500 ,color:"black"}}>
                     {trail.title}
                   </Typography>
                 }
