@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Card, CardContent, Typography, Button, Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Grid, IconButton
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import ChatComponent from '../ChatComponent';
 
 function EventCard() {
@@ -19,7 +30,6 @@ function EventCard() {
     participants: [],
   });
 
-  // Fetch events from backend
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -32,16 +42,14 @@ function EventCard() {
     fetchEvents();
   }, []);
 
-  // Handle clicking on an event card
   const handleCardClick = (event) => {
     setSelectedEvent(event);
   };
 
-  // Handle adding a new event
   const handleAddEvent = async () => {
     try {
       const response = await axios.post('http://localhost:5000/api/events', newEvent);
-      setEvents((prevEvents) => [...prevEvents, response.data]); // Add the newly created event
+      setEvents((prevEvents) => [...prevEvents, response.data]);
       setNewEvent({
         title: '',
         description: '',
@@ -59,47 +67,92 @@ function EventCard() {
   return (
     <Box sx={{ p: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" color="primary">Event Manager</Typography>
+        <Typography variant="h4" color="#06402b">
+          Event Manager
+        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setOpenAddEventDialog(true)}
-          sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', ':hover': { backgroundColor: '#115293' } }}
+          sx={{
+            fontWeight: 'bold',
+            backgroundColor: '#06402b',
+            ':hover': { backgroundColor: '#115293' },
+          }}
         >
           Add Event
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
+      {/* Cards Grid */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: 2,
+          justifyContent: 'center',
+          alignItems: 'start',
+        }}
+      >
         {events.map((event) => (
-          <Grid item xs={12} sm={6} md={4} key={event.id}>
-            <Card
-              sx={{ p: 2, cursor: 'pointer', boxShadow: 4, transition: '0.3s', ':hover': { boxShadow: 6 } }}
-              onClick={() => handleCardClick(event)}
-            >
-              <CardContent>
-                <Typography variant="h6" color="primary" gutterBottom>{event.title}</Typography>
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>{event.description}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>From:</strong> {new Date(event.from).toLocaleDateString()} - <strong>To:</strong> {new Date(event.to).toLocaleDateString()}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>Location:</strong> {event.location}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>Participants:</strong> {event.participants.join(', ')}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card
+            key={event.id}
+            sx={{
+              boxShadow: 3,
+              borderRadius: '8px',
+              p: 2,
+              transition: '0.3s',
+              ':hover': { boxShadow: 6, transform: 'scale(1.02)' },
+            }}
+            onClick={() => handleCardClick(event)}
+          >
+            <CardContent>
+              <Typography
+                variant="subtitle1"
+                color="#06402b"
+                gutterBottom
+                sx={{ fontWeight: 'bold', fontSize: 16 }}
+              >
+                {event.title}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                {event.description}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                <strong>From:</strong> {new Date(event.from).toLocaleDateString()} <br />
+                <strong>To:</strong> {new Date(event.to).toLocaleDateString()}
+              </Typography>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
-      {/* Display ChatComponent if an event is selected */}
+      {/* Chat Section */}
       {selectedEvent && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" color="secondary" sx={{ mb: 2 }}>Chat for {selectedEvent.title}</Typography>
-          <ChatComponent event={selectedEvent} />
+        <Box
+          sx={{
+            mt: 4,
+            p: 3,
+            border: '1px solid #ddd',
+            borderRadius: '12px',
+            backgroundColor: '#fff',
+            position: 'relative',
+          }}
+        >
+          <IconButton
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+            onClick={() => setSelectedEvent(null)}
+          >
+            <CloseIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            color="secondary"
+            sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}
+          >
+            Chat for {selectedEvent.title}
+          </Typography>
+          <ChatComponent eventId={selectedEvent._id} />
         </Box>
       )}
 

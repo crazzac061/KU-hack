@@ -38,7 +38,7 @@ function App() {
         <Route path="/events" element={<EventCard/>} />
         <Route path='/trail' element={<TrailsInfo/>}/>
         <Route path="/add-trails" element={<Protected><AddTrails setPage={setValue}/></Protected>} />
-        <Route path="/chat" element={<ChatComponent />} />
+        {/* <Route path="/chat" element={<ChatComponent />} /> */}
       </Routes>
 
       <BottomNav />
