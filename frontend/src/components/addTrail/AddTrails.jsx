@@ -119,8 +119,9 @@ function AddTrails({setPage}) {
     createTrail(trail,currentUser,dispatch,setPage)
   }
   return (
-    <Container
-    sx={{my:4}}
+    <Box sx={{background: 'linear-gradient(to right, #d7f8e7, #f9fffc)'}}>
+      <Container
+    sx={{py:4}}
     >
       <Stepper 
       alternativeLabel
@@ -180,6 +181,7 @@ function AddTrails({setPage}) {
         )}
         </Box>
     </Container>
+    </Box>
   )
 }
 

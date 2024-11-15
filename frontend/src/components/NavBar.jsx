@@ -11,34 +11,50 @@ import Sidebar from './sidebar/Sidebar';
 const NavBar = () => {
     const { state: { currentUser }, dispatch } = useValue();
     const [isOpen, setIsOpen] = useState(false);
-    const navigate = useNavigate();  // Call useNavigate here, not inside the function
+    const navigate = useNavigate();
 
     const handleLoginClick = () => {
         dispatch({ type: 'OPEN_LOGIN' });
-        navigate('/login'); // Redirect to login page
+        navigate('/login');
     };
 
     return (
         <>
-            <AppBar sx={{ backgroundColor: '#06402b' }}>
+            <AppBar position="fixed" sx={{ backgroundColor: '#06402b', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
                 <Container maxWidth='lg'>
-                    <Toolbar disableGutters>
-                        <Box sx={{ mr: 1 }}>
+                    <Toolbar disableGutters sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box>
                             <IconButton size='large' color='inherit' onClick={() => setIsOpen(true)}>
                                 <MenuIconSharp />
                             </IconButton>
                         </Box>
-
-                        <Typography variant='h5'  component='h1' noWrap sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        गन्तव्य 
-                        </Typography>
-
-                        <Typography variant='h5' component='h1' noWrap sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                        गन्तव्य 
+                        <Typography
+                            variant='h6'
+                            component='h1'
+                            noWrap
+                            sx={{
+                                fontFamily: 'Arial, sans-serif',
+                                fontWeight: 700,
+                                letterSpacing: '.1rem',
+                                textTransform: 'uppercase',
+                                color: '#fff',
+                                flexGrow: 1,
+                                textAlign: { xs: 'center', md: 'center' },
+                            }}
+                        >
+                            गन्तव्य
                         </Typography>
                         {!currentUser ? (
                             <Button
-                                color='inherit'
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: '#ffffff',
+                                    color: '#06402b',
+                                    fontWeight: 'bold',
+                                    '&:hover': {
+                                        backgroundColor: '#f5f5f5',
+                                    },
+                                }}
                                 startIcon={<LockIcon />}
                                 onClick={handleLoginClick}
                             >
