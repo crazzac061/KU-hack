@@ -117,7 +117,7 @@ function AddCheckpoints() {
   const handleSaveDescription = (index) => {
     dispatch({
       type: 'UPDATE_CHECKPOINT',
-      payload: { index, description }
+      payload: { index, description:`Hidden Gems : ${description}` }
     });
     
     setSelectedPoint(null);
@@ -299,14 +299,14 @@ function AddCheckpoints() {
           >
             <Box sx={{ p: 1, minWidth: 200 }}>
               <Box sx={{ mb: 1 }}>
-                Checkpoint {selectedPoint.index + 1}
+                Hidden Gems {selectedPoint.index + 1}
               </Box>
               <TextField
                 fullWidth
                 size="small"
                 multiline
                 rows={2}
-                label="Description"
+                label="Day"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyPress={handleKeyPress}

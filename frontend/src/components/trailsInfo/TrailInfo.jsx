@@ -78,7 +78,7 @@ const TrailInfo = () => {
                     Math.sin(dLon / 2);
 
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                return R * c; // Distance in km
+                return R * c; 
             };
 
             const calculateDifficulty = async () => {
@@ -251,6 +251,16 @@ const TrailInfo = () => {
                         <Typography variant='body2' sx={{ color: '#555' }}>
                             {trail?.description}
                         </Typography>
+                        <Typography variant='body2' sx={{ color: '#555' }}>
+                            
+                        </Typography>
+                        {trail?.checkpoints?.map((checkpoint, index) => (
+              <Box key={index} sx={{ mb: 2 }}>
+                <Typography variant='body2' sx={{ color: '#555' ,mb:2,mt:2}}>
+                  <strong>{checkpoint[2]}</strong>
+                </Typography>
+              </Box>
+            ))}
                     </Box>
                 </Stack>
             </Container>

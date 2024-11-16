@@ -17,7 +17,7 @@ function AddTrails({setPage}) {
     {label:'Start Location',completed:false},
     {label:'Final Location',completed:false},
     {label:'Details',completed:false},
-    {label:'Checkpoints',completed:false},
+    {label:'Hidden Gems',completed:false},
     {label:'Images',completed:false},
     
   ])
