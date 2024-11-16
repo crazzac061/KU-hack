@@ -10,13 +10,15 @@ import { useValue } from '../../context/ContextProvider'
 
 const PopupTrail = ({popupInfo}) => {
     const {title,description,price,images,sloca,floc,checkpoints}=popupInfo
-    console.log(popupInfo)
+    
     const {dispatch}=useValue()
     return (
     <Card
     sx={{
-        maxWidth:400,
-        minWidth:400,
+        maxWidth:100,
+        minWidth:100,
+        maxHeight:100,
+        minHeight:100,
     }}
     >
         <ImageListItem sx={{display:'block'}}>

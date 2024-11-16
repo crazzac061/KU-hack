@@ -29,6 +29,8 @@ const TrailInfo = () => {
     const [splace, setSplace] = useState(null);
     const [fplace, setFplace] = useState(null);
     const [diff, setDiff] = useState(null);
+    const [elevation, setElevation] = useState(null);
+    const [distance, setDistance] = useState(null);
 
     useEffect(() => {
         if (trail) {
@@ -105,6 +107,8 @@ const TrailInfo = () => {
                         dif = "Not categorized";
                     }
                     setDiff(dif);
+                    setElevation(elevationGained);
+                    setDistance(distance);
                 } catch (error) {
                     console.error('Error calculating difficulty:', error);
                 }
@@ -212,6 +216,19 @@ const TrailInfo = () => {
                             </Typography>
                             <Typography variant='body1'>{diff}</Typography>
                         </Box>
+                        <Box>
+                            <Typography variant='subtitle1' fontWeight={700} color="#06402b">
+                                Elevation Gain:
+                            </Typography>
+                            <Typography variant='body1'>{elevation} m</Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant='subtitle1' fontWeight={700} color="#06402b">
+                                Distance:
+                            </Typography>
+                            <Typography variant='body1'>{distance} km</Typography>
+                        </Box>
+
                     </Stack>
                     <Stack direction='row' justifyContent='space-between' flexWrap='wrap' gap={2}>
                         <Box>

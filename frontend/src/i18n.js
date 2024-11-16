@@ -23,7 +23,7 @@ i18n.use(initReactI18next).init({
       translation: {
         eventManager: 'कार्यक्रम व्यवस्थापक',
         addEvent: 'कार्यक्रम थप्नुहोस्',
-        chatFor: 'का लागि संवाद', // "संवाद" is more formal than "गफ"
+        chatFor: '', // "संवाद" is more formal than "गफ"
         addANewEvent: 'नयाँ कार्यक्रम थप्नुहोस्',
         eventTitle: 'कार्यक्रमको शीर्षक',
         eventDescription: 'कार्यक्रमको विवरण',
