@@ -190,7 +190,7 @@ function AddDetails() {
   }, [slocation, flocation, checkpoints]);
 
   return (
-    <Box justifyItems='center' alignItems='center'>
+    <Box justifyItems='center' alignItems='center' sx={{backgroundColor:"white"}}>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
       <FormControl>
         
