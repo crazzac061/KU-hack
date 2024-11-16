@@ -162,7 +162,7 @@ const calculateBoundingBox = (startLoc, endLoc) => {
     const features = mapRef.current.getMap().queryRenderedFeatures(event.point, {
       layers: ['checkpoint-layer']
     });
-    
+
     if (features.length > 0) {
       const clickedCheckpoint = features[0];
       setSelectedCheckpoint({
@@ -197,18 +197,46 @@ const calculateBoundingBox = (startLoc, endLoc) => {
           properties: {},
           geometry: data.routes[0].geometry,
         });
+
+        // Fetch weather data for waypoints
+        const weatherPromises = waypoints.map(([lon, lat]) =>
+          fetchWeatherData(lat, lon)
+        );
+        const weatherData = await Promise.all(weatherPromises);
+
+        // Add weather data to each waypoint
+        const checkpointsData = {
+          type: 'FeatureCollection',
+          features: prop.checkpoints.map(([lon, lat, description], index) => ({
+            type: 'Feature',
+            properties: {
+              description: description || `Checkpoint ${index + 1}`, // Fallback to a generic description if not provided
+              weather: weatherData[index], // Attach weather info
+            },
+            geometry: { type: 'Point', coordinates: [lon, lat] },
+          })),
+        };
+        setCheckpointData(checkpointsData);
+        
       }
-      const checkpointsData = {
-        type: 'FeatureCollection',
-        features: prop.checkpoints.map((checkpoint, index) => ({
-          type: 'Feature',
-          properties: { description: `${checkpoint[2]}` },
-          geometry: { type: 'Point', coordinates: [checkpoint[0], checkpoint[1]] }
-        }))
-      };
-      setCheckpointData(checkpointsData);
     } catch (error) {
-      console.error('Error fetching route:', error);
+      console.error('Error fetching route or weather:', error);
+      return null;
+    }
+  };
+
+  const fetchWeatherData = async (lat, lon) => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=fb32af4b6bf1f56e786a5d08de51454d`
+      );
+      const data = await response.json();
+      return {
+        temperature: data.main.temp,
+        description: data.weather[0].description,
+      };
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
       return null;
     }
   };
@@ -419,27 +447,38 @@ const calculateBoundingBox = (startLoc, endLoc) => {
                       'circle-radius': 6,
                       'circle-color': '#FFFF00',
                       'circle-stroke-width': 1,
-                      'circle-stroke-color': '#fff'
-                    }}
-                  />
-                  <Layer
-                    id="checkpoint-label"
-                    type="symbol"
-                    layout={{
-                      'text-field': ['get', 'description'],
-                      'text-offset': [0, -1.5],
-                      'text-anchor': 'bottom',
-                      'text-size': 12
-                    }}
-                    paint={{
-                      'text-color': '#000',
-                      'text-halo-color': '#fff',
-                      'text-halo-width': 1
+                      'circle-stroke-color': '#fff',
                     }}
                   />
                 </Source>
+                {checkpointData.features.map((feature, index) => (
+                  <Popup
+                    key={`weather-popup-${index}`}
+                    longitude={feature.geometry.coordinates[0]}
+                    latitude={feature.geometry.coordinates[1]}
+                    closeButton={false}
+                    anchor="bottom"
+                  >
+                    <div style={{ textAlign: 'center' }}>
+                      <Typography variant="body2">
+                        {feature.properties.description}
+                      </Typography>
+                      {feature.properties.weather && (
+                        <>
+                          <Typography variant="body2">
+                            Temp: {feature.properties.weather.temperature}°C
+                          </Typography>
+                          <Typography variant="body2">
+                            {feature.properties.weather.description}
+                          </Typography>
+                        </>
+                      )}
+                    </div>
+                  </Popup>
+                ))}
               </>
             )}
+
           </Popup>
         )}
         {poiData && (
@@ -450,7 +489,7 @@ const calculateBoundingBox = (startLoc, endLoc) => {
 
 
 
-         {selectedCheckpoint && (
+        {selectedCheckpoint && (
          
           <Popup
             longitude={selectedCheckpoint.coordinates[0]}
@@ -460,7 +499,7 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             closeOnClick={false}
             anchor="bottom"
           >
-            <div 
+            <div
               style={{
                 padding: '8px',
                 borderRadius: '4px',
@@ -487,7 +526,7 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             </div>
           </Popup>
         )}
-        
+
         <NavigationControl position="top-right" />
         <GeolocateControl position="top-right" />
       </ReactMapGL>

@@ -8,6 +8,9 @@ import UserIcons from './user/UserIcons';
 import { useValue } from '../context/ContextProvider';
 import Sidebar from './sidebar/Sidebar';
 
+// Import the logo
+import Logo from '../assets/logo.png'; // Adjust the path if needed
+
 const NavBar = () => {
     const { state: { currentUser }, dispatch } = useValue();
     const [isOpen, setIsOpen] = useState(false);
@@ -23,11 +26,15 @@ const NavBar = () => {
             <AppBar position="fixed" sx={{ backgroundColor: '#06402b', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
                 <Container maxWidth='lg'>
                     <Toolbar disableGutters sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Box>
+                        {/* Logo */}
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <IconButton size='large' color='inherit' onClick={() => setIsOpen(true)}>
                                 <MenuIconSharp />
                             </IconButton>
+                            <img src={Logo} alt="Logo" style={{ height: '40px', marginLeft: '10px' }} />
                         </Box>
+
+                        {/* Title */}
                         <Typography
                             variant='h6'
                             component='h1'
@@ -44,6 +51,8 @@ const NavBar = () => {
                         >
                             गन्तव्य
                         </Typography>
+
+                        {/* Login or User Icon */}
                         {!currentUser ? (
                             <Button
                                 variant="contained"
