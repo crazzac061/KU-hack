@@ -66,7 +66,7 @@ function AddStartLocation() {
               lng:e.coords.longitude
             }})}}
           />
-          <Geocoder/>
+ <Geocoder updateLocationType="UPDATE_SLOCATION" />
       </ReactMapGL>
     </Box>
   )

@@ -8,7 +8,7 @@ import Geocoder from '../addLocation/Geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 function AddCheckpoints() {
-  const { state: { slocation, flocation, checkpoints , difficulty}, dispatch } = useValue();
+  const { state: { slocation, flocation, checkpoints }, dispatch } = useValue();
   const [routeGeometry, setRouteGeometry] = useState(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [description, setDescription] = useState('');
@@ -87,6 +87,7 @@ function AddCheckpoints() {
       type: 'ADD_CHECKPOINT', 
       payload: newCheckpoint
     });
+    
 
     setSelectedPoint({
       ...newCheckpoint,
@@ -118,7 +119,9 @@ function AddCheckpoints() {
       type: 'UPDATE_CHECKPOINT',
       payload: { index, description }
     });
+    
     setSelectedPoint(null);
+    
   };
 
   useEffect(() => {
