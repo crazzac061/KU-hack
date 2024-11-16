@@ -118,16 +118,17 @@ function ClusterMap() {
         // Add weather data to each waypoint
         const checkpointsData = {
           type: 'FeatureCollection',
-          features: waypoints.map(([lon, lat], index) => ({
+          features: prop.checkpoints.map(([lon, lat, description], index) => ({
             type: 'Feature',
             properties: {
-              description: `Waypoint ${index + 1}`,
+              description: description || `Checkpoint ${index + 1}`, // Fallback to a generic description if not provided
               weather: weatherData[index], // Attach weather info
             },
             geometry: { type: 'Point', coordinates: [lon, lat] },
           })),
         };
         setCheckpointData(checkpointsData);
+        
       }
     } catch (error) {
       console.error('Error fetching route or weather:', error);
