@@ -13,14 +13,18 @@ import {
   DialogActions,
   IconButton,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatComponent from '../ChatComponent';
 import { useTranslation } from 'react-i18next';
 import '../../i18n'; // Import the i18n configuration
-
+import { useValue } from '../../context/ContextProvider';
+import { Visibility, VisibilitySharp } from '@mui/icons-material';
 function EventCard() {
+  const {state:{currentUser},dispatch}=useValue()
   const { t, i18n } = useTranslation(); // Translation hook
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -28,17 +32,19 @@ function EventCard() {
   const [loading, setLoading] = useState(true);
   const [newEvent, setNewEvent] = useState({
     title: '',
+    visible:false,
     description: '',
     from: '',
     to: '',
     location: '',
-    participants: [],
+    participants: [`${currentUser.email}`],
   });
+  
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/events');
+        const response = await axios.get(`http://localhost:5000/api/events?userId=${currentUser.id}`);
         setEvents(response.data);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -52,6 +58,9 @@ function EventCard() {
   const handleCardClick = (event) => {
     setSelectedEvent(event);
   };
+  const handleCheckboxChange = (event) => {
+    setNewEvent({ ...newEvent, visible: event.target.checked });
+  };
 
   const handleAddEvent = async () => {
     try {
@@ -59,11 +68,12 @@ function EventCard() {
       setEvents((prevEvents) => [...prevEvents, response.data]);
       setNewEvent({
         title: '',
+        visible:false,
         description: '',
         from: '',
         to: '',
         location: '',
-        participants: [],
+        participants: [`${currentUser.email}`],
       });
       setOpenAddEventDialog(false);
     } catch (error) {
@@ -173,6 +183,7 @@ function EventCard() {
                   <strong>{t('fromDate')}:</strong> {new Date(event.from).toLocaleDateString()} <br />
                   <strong>{t('toDate')}:</strong> {new Date(event.to).toLocaleDateString()}
                 </Typography>
+                
               </CardContent>
             </Card>
           ))}
@@ -266,6 +277,17 @@ function EventCard() {
             }
             sx={{ mb: 2 }}
           />
+          <FormControlLabel
+          control={
+            <Checkbox
+              checked={newEvent.visible}
+              onChange={handleCheckboxChange}
+              name="visible"
+              color="primary"
+            />
+          }
+          label="Public"
+        />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAddEventDialog(false)}>{t('cancel')}</Button>

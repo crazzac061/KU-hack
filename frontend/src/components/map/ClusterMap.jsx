@@ -318,6 +318,14 @@ function ClusterMap() {
     }
   };
 
+  const handlePointClick = (feature) => {
+    const desc = feature.properties.description;
+    const long=feature.geometry.coordinates[0];
+    const lat=feature.geometry.coordinates[1];
+    const searchQuery = `${desc} near ${lat},${long}`;
+    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+    window.open(googleSearchUrl, '_blank');
+  };
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
@@ -485,7 +493,7 @@ function ClusterMap() {
             maxWidth="auto"
             closeOnClick={false}
             focusAfterOpen={false}
-            onClose={() => {setPopupInfo(null),setIsClick(false)}}
+            onClose={() => {setPopupInfo(null),setIsClick(false),setPoiData(null)}}
           >
             <PopupTrail {...{ popupInfo }} />
             {popupInfo.sloc && popupInfo.floc && (
@@ -553,6 +561,22 @@ function ClusterMap() {
             <Layer {...poiLayer} />
           </Source>
         )}
+        {poiData && poiData.features.map((feature, index) => (
+          <Marker
+            display="none"
+            key={index}
+            longitude={feature.geometry.coordinates[0]}
+            latitude={feature.geometry.coordinates[1]}
+            onClick={() => handlePointClick(feature)}
+          >
+            <div style={{ cursor: 'pointer' }}>
+              <Typography variant="body2">
+                {feature.properties.description}
+              </Typography>
+            </div>
+          </Marker>
+        ))}
+
 
 
 

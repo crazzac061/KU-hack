@@ -35,7 +35,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/map" replace />} />
         <Route path="/map" element={<ClusterMap />} />
-        <Route path="/events" element={<EventCard/>} />
+        <Route path="/events" element={<Protected><EventCard/></Protected>} />
         <Route path='/trail' element={<TrailsInfo/>}/>
         <Route path="/add-trails" element={<Protected><AddTrails setPage={setValue}/></Protected>} />
         {/* <Route path="/chat" element={<ChatComponent />} /> */}

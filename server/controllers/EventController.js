@@ -1,8 +1,8 @@
 import { Event } from '../models/Event.js';  // Using named import
-
+import User from '../models/User.js';  // Using default import
 // Add a new event
 const createEvent = async (req, res) => {
-  const { title, description, from, to, location, participants } = req.body;
+  const { title, description, from, to, location, participants ,visible} = req.body;
 
   try {
     const newEvent = new Event({
@@ -12,6 +12,7 @@ const createEvent = async (req, res) => {
       to,
       location,
       participants,
+      visible
     });
 
     await newEvent.save();
@@ -24,7 +25,15 @@ const createEvent = async (req, res) => {
 // Get all events
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    const userId = req.query.userId
+    console.log(userId)
+
+    const user = await User.findById(userId);
+
+
+
+    const events = await Event.find({ participants: { $in: [user.email] }, visible: true });
+    console.log(events)
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching events' });
