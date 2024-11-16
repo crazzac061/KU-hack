@@ -93,11 +93,11 @@ const TrailInfo = () => {
                     let dif = '';
                     if (numericalRating < 50 && distance < 3) {
                         dif = "Easiest";
-                    } else if (numericalRating >= 50 && numericalRating <= 100 && distance >= 3 && distance <= 5) {
+                    } else if (numericalRating >= 50 && numericalRating <= 100 ) {
                         dif = "Moderate";
-                    } else if (numericalRating > 100 && numericalRating <= 150 && distance >= 5 && distance <= 8) {
+                    } else if (numericalRating > 100 && numericalRating <= 150 ) {
                         dif = "Moderately Strenuous";
-                    } else if (numericalRating > 150 && numericalRating <= 200 && distance >= 7 && distance <= 10) {
+                    } else if (numericalRating > 150 && numericalRating <= 200 ) {
                         dif = "Strenuous";
                     } else if (numericalRating > 200 && distance >= 8) {
                         dif = "Very Strenuous";
