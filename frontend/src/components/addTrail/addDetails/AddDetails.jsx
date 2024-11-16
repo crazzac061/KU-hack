@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
-import { Box, Button, FormControl, RadioGroup, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box,Radio, Button, FormControl,FormControlLabel, InputAdornment,RadioGroup, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Add, Navigation, Save ,Delete} from '@mui/icons-material';
+
 import InfoField from './InfoField'
 import { useValue } from '../../../context/ContextProvider';
 import ReactMapGL, { Marker, NavigationControl, Source, Layer, Popup } from 'react-map-gl';
@@ -9,11 +10,11 @@ import Geocoder from '../addLocation/Geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 function AddDetails() {
-  const { state: { slocation, flocation, checkpoints ,title}, dispatch } = useValue();
+  const { state: { slocation, flocation, checkpoints ,description,title,price}, dispatch } = useValue();
   const [days, setDays] = useState([]);
   const [routeGeometry, setRouteGeometry] = useState(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const [description, setDescription] = useState('');
+  const [descriptio, setDescription] = useState('');
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [viewport, setViewport] = useState({
     latitude: slocation.lat,
@@ -95,7 +96,7 @@ function AddDetails() {
   const handleSaveDescription = (index) => {
     dispatch({
       type: 'UPDATE_CHECKPOINT',
-      payload: { index, description }
+      payload: { index, descriptio }
     });
     setSelectedPoint(null);
   };
@@ -104,6 +105,19 @@ function AddDetails() {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSaveDescription(selectedPoint.index);
+    }
+  };
+  const handlePriceChange = (e) => {
+    dispatch({ type: 'UPDATE_DETAILS', payload: { price: e.target.value } });
+  };
+  const [costType, setCostType] = useState(price ? 1 : 0);
+  const handleCostTypeChange = (e) => {
+    const costType = Number(e.target.value);
+    setCostType(costType);
+    if (costType === 0) {
+      dispatch({ type: 'UPDATE_DETAILS', payload: { price: 0 } });
+    } else {
+      dispatch({ type: 'UPDATE_DETAILS', payload: { price: 15 } });
     }
   };
 
@@ -176,17 +190,49 @@ function AddDetails() {
   }, [slocation, flocation, checkpoints]);
 
   return (
-    <Box>
+    <Box justifyItems='center' alignItems='center' sx={{backgroundColor:"white"}}>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
       <FormControl>
-        <RadioGroup name="costType" row>
-          {/* Your existing RadioGroup code */}
+        
+        <RadioGroup
+          name="costType"
+          value={costType}
+          row
+          onChange={handleCostTypeChange}
+        >
+          <FormControlLabel value={0} control={<Radio />} label="Free Stay" />
+          <FormControlLabel value={1} control={<Radio />} label="Nominal Fee" />
+          {Boolean(costType) && (
+            <TextField
+              sx={{ width: '7ch !important' }}
+              variant="standard"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
+              }}
+              inputProps={{ type: 'number', min: 1, max: 150 }}
+              value={price}
+              onChange={handlePriceChange}
+              name="price"
+            />
+          )}
         </RadioGroup>
+        
       </FormControl>
-
+        </Stack>
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
       <InfoField
         mainProps={{ name: 'title', label: 'Title', value: title }}
         minLength={5}
       />
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+       <InfoField
+        mainProps={{ name: 'description', label: 'Description', value: description }}
+        minLength={5}
+      />
+      </Stack>
 
       <Stack spacing={2} sx={{ width: '100%', maxWidth: 500, m: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -313,7 +359,7 @@ function AddDetails() {
                     multiline
                     rows={2}
                     label="Description"
-                    value={description}
+                    value={descriptio}
                     onChange={(e) => setDescription(e.target.value)}
                     onKeyPress={handleKeyPress}
                     autoFocus
