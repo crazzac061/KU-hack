@@ -17,8 +17,11 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatComponent from '../ChatComponent';
+import { useTranslation } from 'react-i18next';
+import '../../i18n'; // Import the i18n configuration
 
 function EventCard() {
+  const { t, i18n } = useTranslation(); // Translation hook
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openAddEventDialog, setOpenAddEventDialog] = useState(false);
@@ -82,11 +85,32 @@ function EventCard() {
           sx={{
             fontWeight: 'bold',
             color: '#06402b',
-            // textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
           }}
         >
-        Event Manager
+          {t('eventManager')}
         </Typography>
+        <Box>
+          <Button
+            onClick={() => i18n.changeLanguage('en')}
+            sx={{
+              fontWeight: 'bold',
+              color: i18n.language === 'en' ? '#06402b' : '#000',
+              textDecoration: i18n.language === 'en' ? 'underline' : 'none',
+            }}
+          >
+            English
+          </Button>
+          <Button
+            onClick={() => i18n.changeLanguage('np')}
+            sx={{
+              fontWeight: 'bold',
+              color: i18n.language === 'np' ? '#06402b' : '#000',
+              textDecoration: i18n.language === 'np' ? 'underline' : 'none',
+            }}
+          >
+            नेपाली
+          </Button>
+        </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -102,11 +126,10 @@ function EventCard() {
             },
           }}
         >
-          Add Event
+          {t('addEvent')}
         </Button>
       </Box>
 
-      {/* Cards Grid */}
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
           <CircularProgress color="secondary" />
@@ -147,8 +170,8 @@ function EventCard() {
                   {event.description}
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
-                  <strong>From:</strong> {new Date(event.from).toLocaleDateString()} <br />
-                  <strong>To:</strong> {new Date(event.to).toLocaleDateString()}
+                  <strong>{t('fromDate')}:</strong> {new Date(event.from).toLocaleDateString()} <br />
+                  <strong>{t('toDate')}:</strong> {new Date(event.to).toLocaleDateString()}
                 </Typography>
               </CardContent>
             </Card>
@@ -156,7 +179,6 @@ function EventCard() {
         </Box>
       )}
 
-      {/* Chat Section */}
       {selectedEvent && (
         <Box
           sx={{
@@ -180,69 +202,75 @@ function EventCard() {
             color="secondary"
             sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}
           >
-            Chat for {selectedEvent.title}
+            {t('chatFor')} {selectedEvent.title}
           </Typography>
           <ChatComponent eventId={selectedEvent._id} />
         </Box>
       )}
 
-      {/* Add Event Dialog */}
       <Dialog open={openAddEventDialog} onClose={() => setOpenAddEventDialog(false)}>
-        <DialogTitle>Add a New Event</DialogTitle>
+        <DialogTitle>{t('addANewEvent')}</DialogTitle>
         <DialogContent>
           <TextField
-            label="Event Title"
+            label={t('eventTitle')}
             fullWidth
             value={newEvent.title}
             onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
             sx={{ mb: 2 }}
           />
           <TextField
-            label="Event Description"
+            label={t('eventDescription')}
             fullWidth
             value={newEvent.description}
             onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
             sx={{ mb: 2 }}
           />
           <TextField
-            label="From Date"
+            label={t('fromDate')}
             type="date"
             fullWidth
             value={newEvent.from}
             onChange={(e) => setNewEvent({ ...newEvent, from: e.target.value })}
             sx={{ mb: 2 }}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
           <TextField
-            label="To Date"
+            label={t('toDate')}
             type="date"
             fullWidth
             value={newEvent.to}
             onChange={(e) => setNewEvent({ ...newEvent, to: e.target.value })}
             sx={{ mb: 2 }}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
           <TextField
-            label="Location"
+            label={t('location')}
             fullWidth
             value={newEvent.location}
             onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
             sx={{ mb: 2 }}
           />
           <TextField
-            label="Participants (comma separated)"
+            label={t('participants')}
             fullWidth
             value={newEvent.participants.join(', ')}
-            onChange={(e) => setNewEvent({ ...newEvent, participants: e.target.value.split(',') })}
+            onChange={(e) =>
+              setNewEvent({
+                ...newEvent,
+                participants: e.target.value.split(',').map((p) => p.trim()),
+              })
+            }
             sx={{ mb: 2 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenAddEventDialog(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleAddEvent} color="primary" variant="contained">
-            Add Event
+          <Button onClick={() => setOpenAddEventDialog(false)}>{t('cancel')}</Button>
+          <Button onClick={handleAddEvent} variant="contained">
+            {t('addEventButton')}
           </Button>
         </DialogActions>
       </Dialog>
