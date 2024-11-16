@@ -189,7 +189,7 @@ function AddDetails() {
         minLength={5}
       />
        <InfoField
-        mainProps={{ name: 'description', label: 'description', value: description }}
+        mainProps={{ name: 'description', label: 'Description', value: description }}
         minLength={5}
       />
      </Stack>
