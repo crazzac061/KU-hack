@@ -66,7 +66,7 @@ function AddFinalLocation() {
               lng:e.coords.longitude
             }})}}
           />
-          <Geocoder/>
+           <Geocoder updateLocationType="UPDATE_FLOCATION" />
       </ReactMapGL>
     </Box>
   )
