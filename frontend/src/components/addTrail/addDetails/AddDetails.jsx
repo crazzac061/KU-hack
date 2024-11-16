@@ -272,7 +272,8 @@ function AddDetails() {
       {mapOpen && (
         <Box
           sx={{
-            height: 400,
+            height: "400px",
+            width:"100%",
             position: 'relative',
             '& .mapboxgl-marker': {
               transition: 'transform 0.2s',
