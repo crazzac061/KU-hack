@@ -5,7 +5,7 @@ import ReactMapGL, { Marker, Popup, NavigationControl, GeolocateControl, Source,
 import SuperCluster from 'supercluster';
 import './cluster.css'
 import { Avatar, Paper, Tooltip } from '@mui/material';
-import { Typography ,Box,Button} from '@mui/material';
+import { Typography, Box, Button } from '@mui/material';
 import ParkIcon from '@mui/icons-material/Park';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import GeocoderInput from '../sidebar/GeocoderInput';
@@ -30,10 +30,13 @@ function ClusterMap() {
   const [zoom, setZoom] = useState(0);
   const [popupInfo, setPopupInfo] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(null);
-  const[isClick,setIsClick]=useState(false)
- const [category, setCategory] = useState(null);
+  const [isClick, setIsClick] = useState(false);
   const [poiData, setPoiData] = useState(null);
-  const [searchBbox, setSearchBbox] = useState(null);
+  const [searchParams, setSearchParams] = useState({
+    category: null,
+    routeCoordinates: null
+  });
+
   useEffect(() => {
     getTrails(dispatch);
   }, []);
@@ -63,24 +66,97 @@ function ClusterMap() {
     setPoints(points);
   }, [filteredTrails]);
 
-  
+  const pointToLineDistance = (point, lineStart, lineEnd) => {
+    const [x, y] = point;
+    const [x1, y1] = lineStart;
+    const [x2, y2] = lineEnd;
+    
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+    
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    
+    if (lenSq !== 0) param = dot / lenSq;
+    
+    let xx, yy;
+    
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+    
+    const dx = x - xx;
+    const dy = y - yy;
+    
+    const R = 6371; // Earth's radius in km
+    return Math.sqrt(dx * dx + dy * dy) * Math.PI / 180 * R;
+  };
+
+  const isPointNearRoute = (point, routeCoordinates, threshold = 10) => {
+    if (!routeCoordinates || routeCoordinates.length < 2) return false;
+    
+    for (let i = 0; i < routeCoordinates.length - 1; i++) {
+      const distance = pointToLineDistance(
+        point,
+        routeCoordinates[i],
+        routeCoordinates[i + 1]
+      );
+      if (distance <= threshold) return true;
+    }
+    return false;
+  };
+  const ICON_MAPPING = {
+    hospital: 'hospital-15',
+    natural: 'park-15',
+    cultural: 'monument-15',
+    hotel: 'lodging-15',
+    gas: 'fuel-15',
+    grocery: 'grocery-15'
+  };
+
+  useEffect(() => {
     const fetchPOIData = async () => {
       try {
+        if (!searchParams.category || !searchParams.routeCoordinates) return;
         
+        const coords = searchParams.routeCoordinates;
+        const minLng = Math.min(...coords.map(c => c[0])) - 0.1;
+        const maxLng = Math.max(...coords.map(c => c[0])) + 0.1;
+        const minLat = Math.min(...coords.map(c => c[1])) - 0.1;
+        const maxLat = Math.max(...coords.map(c => c[1])) + 0.1;
         
-        
-        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${category}.json?bbox=${searchBbox.join(',')}&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g&limit=100`);
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchParams.category}.json?bbox=${[minLng, minLat, maxLng, maxLat].join(',')}&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g&limit=100`
+        );
         const data = await response.json();
         
-        const features = data.features.map(feature => ({
-          type: 'Feature',
-          properties: {
-            description: feature.text,
-            category: category
-          },
-          geometry: feature.geometry
-        }));
-        console.log(features)
+        const features = data.features
+          .filter(feature => 
+            isPointNearRoute(
+              feature.geometry.coordinates,
+              searchParams.routeCoordinates
+            )
+          )
+          .map(feature => ({
+            type: 'Feature',
+            properties: {
+              description: feature.text,
+              category: searchParams.category,
+              icon: ICON_MAPPING[searchParams.category] || 'park-15'
+            },
+            geometry: feature.geometry
+          }));
+
         setPoiData({
           type: 'FeatureCollection',
           features
@@ -89,54 +165,36 @@ function ClusterMap() {
         console.error('Error fetching POI data:', error);
       }
     };
-    const handleCategoryClick = (newCategory) => {
-      setCategory(newCategory);
-      setPoiData(null); // Clear previous POI data
-      fetchPOIData();
-    };
- 
 
-    const poiLayer = {
-      id: 'poi-layer',
-      type: 'circle',
-      source: 'poi-data',
-      paint: {
-        'circle-radius': 6,
-        'circle-color': [
-          'match',
-          ['get', 'category'],
-          'hospital', '#FF0000',
-          'natural', '#00FF00',
-          'cultural', '#FFA500',
-          'hotel', '#0000FF',
-          'gas', '#800080',
-          'grocery', '#008000',
-          '#FFFFFF' // default color
-        ]
-      }
-    };
-
+    fetchPOIData();
+  }, [searchParams]);
   
+  useEffect(() => {
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      map.on('load', () => {
+        // Ensure the icons are loaded
+        Object.values(ICON_MAPPING).forEach(iconName => {
+          if (!map.hasImage(iconName)) {
+            map.loadImage(
+              `https://api.mapbox.com/v4/marker/${iconName}.png?access_token=${map.getCanvas().style.imageManager._requestManager._transformRequest.options.accessToken}`,
+              (error, image) => {
+                if (error) throw error;
+                if (!map.hasImage(iconName)) map.addImage(iconName, image);
+              }
+            );
+          }
+        });
+      });
+    }
+  }, [mapRef.current]);
 
-
-const calculateBoundingBox = (startLoc, endLoc) => {
-  const padding = 0.1; // Add 0.1 degrees padding around the route
-  
-  const minLng = Math.min(startLoc[0], endLoc[0]) - padding;
-  const maxLng = Math.max(startLoc[0], endLoc[0]) + padding;
-  const minLat = Math.min(startLoc[1], endLoc[1]) - padding;
-  const maxLat = Math.max(startLoc[1], endLoc[1]) + padding;
-  
-  return [minLng, minLat, maxLng, maxLat];
-};
-
-
-
-
-
-
-
-
+  const handleCategoryClick = (newCategory) => {
+    setSearchParams(prev => ({
+      ...prev,
+      category: newCategory
+    }));
+  };
 
   useEffect(() => {
     supercluster.load(points);
@@ -149,13 +207,57 @@ const calculateBoundingBox = (startLoc, endLoc) => {
     }
   }, [mapRef?.current]);
 
-  const handlePopupOpen = (properties) => {
-    
+  const handlePopupOpen = async (properties) => {
     setPopupInfo(properties);
-    const bbox = calculateBoundingBox(properties.sloc, properties.floc);
-    setSearchBbox(bbox);
-    fetchRouteData(properties);
-    setIsClick(true)
+    setIsClick(true);
+    
+    const waypoints = [
+      [properties.sloc[0], properties.sloc[1]],
+      ...properties.checkpoints.map(checkpoint => [checkpoint[0], checkpoint[1]]),
+      [properties.floc[0], properties.floc[1]]
+    ];
+    
+    try {
+      const coordinates = waypoints.map((coord) => coord.join(',')).join(';');
+      const response = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`
+      );
+      const data = await response.json();
+      
+      if (data.routes && data.routes[0]) {
+        const routeCoordinates = data.routes[0].geometry.coordinates;
+        setRouteGeometry({
+          type: 'Feature',
+          properties: {},
+          geometry: data.routes[0].geometry,
+        });
+        
+        setSearchParams(prev => ({
+          ...prev,
+          routeCoordinates
+        }));
+        
+        const weatherPromises = waypoints.map(([lon, lat]) =>
+          fetchWeatherData(lat, lon)
+        );
+        const weatherData = await Promise.all(weatherPromises);
+        
+        const checkpointsData = {
+          type: 'FeatureCollection',
+          features: properties.checkpoints.map(([lon, lat, description], index) => ({
+            type: 'Feature',
+            properties: {
+              description: description || `Checkpoint ${index + 1}`,
+              weather: weatherData[index],
+            },
+            geometry: { type: 'Point', coordinates: [lon, lat] },
+          })),
+        };
+        setCheckpointData(checkpointsData);
+      }
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
   };
 
   const handleCheckpointClick = (event) => {
@@ -171,57 +273,6 @@ const calculateBoundingBox = (startLoc, endLoc) => {
       });
     } else {
       setSelectedCheckpoint(null);
-    }
-  };
-
-  const fetchRouteData = async (prop) => {
-    if (!prop.sloc || !prop.floc) return null;
-    const waypoints = [
-      [prop.sloc[0], prop.sloc[1]],
-      ...prop.checkpoints.map(checkpoint => [checkpoint[0], checkpoint[1]]),
-      [prop.floc[0], prop.floc[1]],
-    ];
-
-    if (waypoints.length < 2) return null;
-
-    try {
-      const coordinates = waypoints.map((coord) => coord.join(',')).join(';');
-      const response = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`
-      );
-      const data = await response.json();
-      
-      if (data.routes && data.routes[0]) {
-        setRouteGeometry({
-          type: 'Feature',
-          properties: {},
-          geometry: data.routes[0].geometry,
-        });
-
-        // Fetch weather data for waypoints
-        const weatherPromises = waypoints.map(([lon, lat]) =>
-          fetchWeatherData(lat, lon)
-        );
-        const weatherData = await Promise.all(weatherPromises);
-
-        // Add weather data to each waypoint
-        const checkpointsData = {
-          type: 'FeatureCollection',
-          features: prop.checkpoints.map(([lon, lat, description], index) => ({
-            type: 'Feature',
-            properties: {
-              description: description || `Checkpoint ${index + 1}`, // Fallback to a generic description if not provided
-              weather: weatherData[index], // Attach weather info
-            },
-            geometry: { type: 'Point', coordinates: [lon, lat] },
-          })),
-        };
-        setCheckpointData(checkpointsData);
-        
-      }
-    } catch (error) {
-      console.error('Error fetching route or weather:', error);
-      return null;
     }
   };
 
@@ -241,32 +292,59 @@ const calculateBoundingBox = (startLoc, endLoc) => {
     }
   };
 
+  const poiLayer = {
+    id: 'poi-layer',
+    type: 'symbol',
+    source: 'poi-data',
+    layout: {
+      'icon-image': [
+        'match',
+        ['get', 'category'],
+        'hospital', 'hospital-15',
+        'natural', 'park-15',
+        'cultural', 'monument-15',
+        'hotel', 'lodging-15',
+        'gas', 'fuel-15',
+        'grocery', 'grocery-15',
+        'park-15' // default icon
+      ],
+      'icon-size': 1.5,
+      'icon-allow-overlap': true,
+      'icon-anchor': 'bottom',
+    },
+    paint: {
+      'icon-opacity': 0.9
+    }
+  };
+
+
   return (
     <div style={{ height: '100vh', width: '100%' }}>
-        {isClick && (
+      {isClick && (
         <Box
           sx={{
             opacity: 1,
             transform: "scale(1)",
-            transition: "opacity 0.5s ease, transform 0..5s ease",
-            display: "flex", // Always flex when rendered
+            transition: "opacity 0.5s ease, transform 0.5s ease",
+            display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             gap: 2,
             margin: 2,
+            
           }}
         >
           <Button
             variant="contained"
             startIcon={<ParkIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>{handleCategoryClick("natural")}}
+            onClick={() => handleCategoryClick("natural")}
           >
             Natural landmark
           </Button>
@@ -274,13 +352,13 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             variant="contained"
             startIcon={<AccountBalanceIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>{handleCategoryClick("cultural")}}
+            onClick={() => handleCategoryClick("cultural")}
           >
             Heritages
           </Button>
@@ -288,13 +366,13 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             variant="contained"
             startIcon={<HotelIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>handleCategoryClick("hotel")}
+            onClick={() => handleCategoryClick("hotel")}
           >
             Accommodation
           </Button>
@@ -302,13 +380,13 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             variant="contained"
             startIcon={<LocalHospitalIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>handleCategoryClick("hospital")}
+            onClick={() => handleCategoryClick("hospital")}
           >
             Hospital
           </Button>
@@ -316,13 +394,13 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             variant="contained"
             startIcon={<LocalGasStationIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>handleCategoryClick("gas")}
+            onClick={() => handleCategoryClick("gas")}
           >
             Gas Station
           </Button>
@@ -330,28 +408,17 @@ const calculateBoundingBox = (startLoc, endLoc) => {
             variant="contained"
             startIcon={<EvStationIcon />}
             sx={{
-              backgroundColor: "#6A1B9A",
-              color: "#fff",
+              backgroundColor: "#fff",
+              color: "#06402b",
               textTransform: "none",
               borderRadius: "12px",
               padding: "10px 20px",
             }}
-            onClick={()=>handleCategoryClick("grocery")}
+            onClick={() => handleCategoryClick("grocery")}
           >
             Grocery stores
           </Button>
         </Box>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
       )}
 
       <ReactMapGL
@@ -362,7 +429,6 @@ const calculateBoundingBox = (startLoc, endLoc) => {
         onZoomEnd={(e) => setZoom(Math.round(e.viewState.zoom))}
         onClick={handleCheckpointClick}
       >
-        {/* Existing markers and clusters code... */}
         {clusters.map((cluster) => {
           const { cluster: isCluster, point_count } = cluster.properties;
           const [longitude, latitude] = cluster.geometry.coordinates;

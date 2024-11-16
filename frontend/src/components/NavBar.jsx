@@ -46,6 +46,7 @@ const NavBar = () => {
                                 textTransform: 'uppercase',
                                 color: '#fff',
                                 flexGrow: 1,
+                                fontSize: { xs: '1rem', md: '1.5rem' },
                                 textAlign: { xs: 'center', md: 'center' },
                             }}
                         >
