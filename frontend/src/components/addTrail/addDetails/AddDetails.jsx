@@ -96,7 +96,7 @@ function AddDetails() {
   const handleSaveDescription = (index) => {
     dispatch({
       type: 'UPDATE_CHECKPOINT',
-      payload: { index, descriptio }
+      payload: { index, description: `Day ${index} : ${descriptio}` }
     });
     setSelectedPoint(null);
   };
@@ -204,14 +204,14 @@ function AddDetails() {
           <FormControlLabel value={1} control={<Radio />} label="Nominal Fee" />
           {Boolean(costType) && (
             <TextField
-              sx={{ width: '7ch !important' }}
+              sx={{ width: '15ch !important' }}
               variant="standard"
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
+                  <InputAdornment position="start">NPR</InputAdornment>
                 ),
               }}
-              inputProps={{ type: 'number', min: 1, max: 150 }}
+              inputProps={{ type: 'number', min: 1, max: 500000 }}
               value={price}
               onChange={handlePriceChange}
               name="price"
@@ -248,7 +248,7 @@ function AddDetails() {
         </Stack>
         {days.map((day, index) => (
           <Box key={index}>
-            <TextField
+            {/* <TextField
               label={`Day ${day.dayNumber} Activities`}
               value={day.activities}
               onChange={(e) => handleDayChange(index, e.target.value)}
@@ -256,7 +256,7 @@ function AddDetails() {
               multiline
               rows={2}
               sx={{ mb: 2 }}
-            />
+            /> */}
             <Button
               variant="outlined"
               onClick={() => setMapOpen(true)}
@@ -352,7 +352,7 @@ function AddDetails() {
               >
                 <Box sx={{ p: 1, minWidth: 200 }}>
                   <Box sx={{ mb: 1 }}>
-                    Checkpoint {selectedPoint.index + 1}
+                    Day {selectedPoint.index + 1}
                   </Box>
                   <TextField
                     fullWidth

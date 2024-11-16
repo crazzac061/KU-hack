@@ -15,10 +15,10 @@ const PopupTrail = ({popupInfo}) => {
     return (
     <Card
     sx={{
-        maxWidth:100,
-        minWidth:100,
-        maxHeight:100,
-        minHeight:100,
+        maxWidth:200,
+        minWidth:200,
+        maxHeight:200,
+        minHeight:200,
     }}
     >
         <ImageListItem sx={{display:'block'}}>
