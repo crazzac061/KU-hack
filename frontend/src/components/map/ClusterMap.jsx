@@ -282,6 +282,7 @@ function ClusterMap() {
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=fb32af4b6bf1f56e786a5d08de51454d`
       );
       const data = await response.json();
+      console.log(data)
       return {
         temperature: data.main.temp,
         description: data.weather[0].description,
