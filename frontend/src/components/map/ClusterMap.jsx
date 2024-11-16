@@ -5,9 +5,15 @@ import ReactMapGL, { Marker, Popup, NavigationControl, GeolocateControl, Source,
 import SuperCluster from 'supercluster';
 import './cluster.css'
 import { Avatar, Paper, Tooltip } from '@mui/material';
-import { Typography } from '@mui/material';
+import { Typography ,Box,Button} from '@mui/material';
+import ParkIcon from '@mui/icons-material/Park';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import GeocoderInput from '../sidebar/GeocoderInput';
 import PopupTrail from './PopupTrail';
+import HotelIcon from '@mui/icons-material/Hotel';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import EvStationIcon from '@mui/icons-material/EvStation';
 
 const supercluster = new SuperCluster({
   radius: 75,
@@ -24,7 +30,10 @@ function ClusterMap() {
   const [zoom, setZoom] = useState(0);
   const [popupInfo, setPopupInfo] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(null);
-
+  const[isClick,setIsClick]=useState(false)
+ const [category, setCategory] = useState(null);
+  const [poiData, setPoiData] = useState(null);
+  const [searchBbox, setSearchBbox] = useState(null);
   useEffect(() => {
     getTrails(dispatch);
   }, []);
@@ -54,6 +63,81 @@ function ClusterMap() {
     setPoints(points);
   }, [filteredTrails]);
 
+  
+    const fetchPOIData = async () => {
+      try {
+        
+        
+        
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${category}.json?bbox=${searchBbox.join(',')}&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g&limit=100`);
+        const data = await response.json();
+        
+        const features = data.features.map(feature => ({
+          type: 'Feature',
+          properties: {
+            description: feature.text,
+            category: category
+          },
+          geometry: feature.geometry
+        }));
+        console.log(features)
+        setPoiData({
+          type: 'FeatureCollection',
+          features
+        });
+      } catch (error) {
+        console.error('Error fetching POI data:', error);
+      }
+    };
+    const handleCategoryClick = (newCategory) => {
+      setCategory(newCategory);
+      setPoiData(null); // Clear previous POI data
+      fetchPOIData();
+    };
+ 
+
+    const poiLayer = {
+      id: 'poi-layer',
+      type: 'circle',
+      source: 'poi-data',
+      paint: {
+        'circle-radius': 6,
+        'circle-color': [
+          'match',
+          ['get', 'category'],
+          'hospital', '#FF0000',
+          'natural', '#00FF00',
+          'cultural', '#FFA500',
+          'hotel', '#0000FF',
+          'gas', '#800080',
+          'grocery', '#008000',
+          '#FFFFFF' // default color
+        ]
+      }
+    };
+
+  
+
+
+const calculateBoundingBox = (startLoc, endLoc) => {
+  const padding = 0.1; // Add 0.1 degrees padding around the route
+  
+  const minLng = Math.min(startLoc[0], endLoc[0]) - padding;
+  const maxLng = Math.max(startLoc[0], endLoc[0]) + padding;
+  const minLat = Math.min(startLoc[1], endLoc[1]) - padding;
+  const maxLat = Math.max(startLoc[1], endLoc[1]) + padding;
+  
+  return [minLng, minLat, maxLng, maxLat];
+};
+
+
+
+
+
+
+
+
+
   useEffect(() => {
     supercluster.load(points);
     setClusters(supercluster.getClusters(bounds, zoom));
@@ -66,8 +150,12 @@ function ClusterMap() {
   }, [mapRef?.current]);
 
   const handlePopupOpen = (properties) => {
+    
     setPopupInfo(properties);
+    const bbox = calculateBoundingBox(properties.sloc, properties.floc);
+    setSearchBbox(bbox);
     fetchRouteData(properties);
+    setIsClick(true)
   };
 
   const handleCheckpointClick = (event) => {
@@ -102,6 +190,7 @@ function ClusterMap() {
         `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`
       );
       const data = await response.json();
+      
       if (data.routes && data.routes[0]) {
         setRouteGeometry({
           type: 'Feature',
@@ -126,6 +215,117 @@ function ClusterMap() {
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
+        {isClick && (
+        <Box
+          sx={{
+            opacity: 1,
+            transform: "scale(1)",
+            transition: "opacity 0.5s ease, transform 0..5s ease",
+            display: "flex", // Always flex when rendered
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+            margin: 2,
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<ParkIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>{handleCategoryClick("natural")}}
+          >
+            Natural landmark
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AccountBalanceIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>{handleCategoryClick("cultural")}}
+          >
+            Heritages
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<HotelIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>handleCategoryClick("hotel")}
+          >
+            Accommodation
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<LocalHospitalIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>handleCategoryClick("hospital")}
+          >
+            Hospital
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<LocalGasStationIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>handleCategoryClick("gas")}
+          >
+            Gas Station
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<EvStationIcon />}
+            sx={{
+              backgroundColor: "#6A1B9A",
+              color: "#fff",
+              textTransform: "none",
+              borderRadius: "12px",
+              padding: "10px 20px",
+            }}
+            onClick={()=>handleCategoryClick("grocery")}
+          >
+            Grocery stores
+          </Button>
+        </Box>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      )}
+
       <ReactMapGL
         initialViewState={{ latitude: 27, longitude: 88, zoom: 6 }}
         mapboxAccessToken={'pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g'}
@@ -176,7 +376,7 @@ function ClusterMap() {
                   src={cluster.properties.uPhoto}
                   component={Paper}
                   elevation={2}
-                  onMouseEnter={() => handlePopupOpen(cluster.properties)}
+                  onClick={() => handlePopupOpen(cluster.properties)}
                 />
               </Tooltip>
             </Marker>
@@ -190,7 +390,7 @@ function ClusterMap() {
             maxWidth="auto"
             closeOnClick={false}
             focusAfterOpen={false}
-            onClose={() => setPopupInfo(null)}
+            onClose={() => {setPopupInfo(null),setIsClick(false)}}
           >
             <PopupTrail {...{ popupInfo }} />
             {popupInfo.sloc && popupInfo.floc && (
@@ -242,7 +442,16 @@ function ClusterMap() {
             )}
           </Popup>
         )}
+        {poiData && (
+          <Source id="poi-data" type="geojson" data={poiData}>
+            <Layer {...poiLayer} />
+          </Source>
+        )}
+
+
+
          {selectedCheckpoint && (
+         
           <Popup
             longitude={selectedCheckpoint.coordinates[0]}
             latitude={selectedCheckpoint.coordinates[1]}
