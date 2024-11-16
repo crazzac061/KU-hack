@@ -8,7 +8,8 @@ const eventSchema = new mongoose.Schema(
     from: { type: Date, required: true },
     to: { type: Date, required: true },
     location: { type: String, required: true },
-    participants: { type: [String], default: [] }, // array of participant usernames
+    participants: { type: [String], default: [] }, 
+    visible:{type:Boolean,required:true}// array of participant usernames
   },
   { timestamps: true }
 );
