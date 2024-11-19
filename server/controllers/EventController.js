@@ -26,13 +26,17 @@ const createEvent = async (req, res) => {
 const getEvents = async (req, res) => {
   try {
     const userId = req.query.userId
-    console.log(userId)
+    
 
     const user = await User.findById(userId);
 
 
-
-    const events = await Event.find({ participants: { $in: [user.email] }, visible: true });
+    const events = await Event.find({
+      $or: [
+        { participants: { $in: [user.email] } },
+        { visible: true }
+      ]
+    });
     console.log(events)
     res.status(200).json(events);
   } catch (error) {
