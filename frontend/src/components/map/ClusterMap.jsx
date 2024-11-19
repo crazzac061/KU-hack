@@ -136,7 +136,7 @@ function ClusterMap() {
         const maxLat = Math.max(...coords.map(c => c[1])) + 0.1;
         
         const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchParams.category}.json?bbox=${[minLng, minLat, maxLng, maxLat].join(',')}&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g&limit=100`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchParams.category}.json?bbox=${[minLng, minLat, maxLng, maxLat].join(',')}&access_token=MAPBOX_TOKEN&limit=100`
         );
         const data = await response.json();
         
@@ -220,7 +220,7 @@ function ClusterMap() {
     try {
       const coordinates = waypoints.map((coord) => coord.join(',')).join(';');
       const response = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&access_token=MAPBOX_TOKEN`
       );
       const data = await response.json();
       
@@ -432,7 +432,7 @@ function ClusterMap() {
 
       <ReactMapGL
         initialViewState={{ latitude: 27, longitude: 88, zoom: 6 }}
-        mapboxAccessToken={'pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g'}
+        mapboxAccessToken={'MAPBOX_TOKEN'}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         ref={mapRef}
         onZoomEnd={(e) => setZoom(Math.round(e.viewState.zoom))}

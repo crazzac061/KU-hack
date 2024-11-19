@@ -71,7 +71,7 @@ const ChatComponent = ({ eventId }) => {
             handleSendMessage();
         }
     };
-    setInterval(fetchMessages, 2000);
+    
 
     if (loading) return <div>Loading...</div>;
     if (!userId) return <div>User Not Logged In</div>;

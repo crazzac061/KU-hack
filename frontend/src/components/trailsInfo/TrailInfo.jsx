@@ -35,8 +35,8 @@ const TrailInfo = () => {
     useEffect(() => {
         if (trail) {
             const fetchPlaceNames = async () => {
-                const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${trail.sloc[0]},${trail.sloc[1]}.json?access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`;
-                const url2 = `https://api.mapbox.com/geocoding/v5/mapbox.places/${trail.floc[0]},${trail.floc[1]}.json?access_token=pk.eyJ1IjoiYWJoaXlhbjEyMTIiLCJhIjoiY20zNnQwNWJnMGFsbzJqc2wxMTh2a2JjaCJ9.QY9Xj_GfNoO9yu9nkiMb1g`;
+                const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${trail.sloc[0]},${trail.sloc[1]}.json?access_token=MAPBOX_TOKEN`;
+                const url2 = `https://api.mapbox.com/geocoding/v5/mapbox.places/${trail.floc[0]},${trail.floc[1]}.json?access_token=MAPBOX_TOKEN`;
 
                 const [startPlace, finishPlace] = await Promise.all([
                     fetch(url).then((res) => res.json()),
